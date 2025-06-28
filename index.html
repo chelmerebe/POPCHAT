@@ -70,6 +70,11 @@
       <button onclick="createRoom()">צור חדר</button>
     </div>
 
+    <div id="joinPrompt" style="display:none">
+      <input type="text" id="guestNickname" placeholder="הכינוי שלך">
+      <button onclick="enterAsGuest()">הצטרף לחדר</button>
+    </div>
+
     <div id="chatArea" class="chat" style="display:none">
       <p><strong>חדר:</strong> <span id="roomTitle"></span></p>
       <div class="messages" id="messages"></div>
@@ -144,11 +149,19 @@
         const div = document.createElement('div');
         div.className = 'message';
         const time = new Date(msg.timestamp).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-        div.innerText = `${msg.sender} • ${time}
-${msg.text}`;
+        div.innerText = `${msg.sender} • ${time}\n${msg.text}`;
         container.appendChild(div);
         container.scrollTop = container.scrollHeight;
       });
+    }
+
+    function enterAsGuest() {
+      const nickname = document.getElementById('guestNickname').value.trim();
+      if (!nickname) return alert('אנא הזן כינוי');
+      currentNickname = nickname;
+      document.getElementById('joinPrompt').style.display = 'none';
+      document.getElementById('chatArea').style.display = 'block';
+      listenForMessages();
     }
 
     window.addEventListener('load', () => {
@@ -162,10 +175,9 @@ ${msg.text}`;
             return;
           }
           currentRoomId = roomId;
-          currentNickname = 'אורח';
           document.getElementById('roomTitle').innerText = room.name;
           document.getElementById('setup').style.display = 'none';
-          document.getElementById('chatArea').style.display = 'block';
+          document.getElementById('joinPrompt').style.display = 'block';
 
           const shareUrl = window.location.href;
           document.getElementById('shareLink').innerText = shareUrl;
@@ -173,11 +185,10 @@ ${msg.text}`;
           qr.addData(shareUrl);
           qr.make();
           document.getElementById('qr').innerHTML = qr.createImgTag(4);
-
-          listenForMessages();
         });
       }
     });
   </script>
 </body>
 </html>
+
