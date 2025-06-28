@@ -8,60 +8,290 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
   <style>
-    body {
+    * {
       margin: 0;
       padding: 0;
-      background: linear-gradient(135deg, #c2e9fb 0%, #f9f9f9 100%);
-      font-family: 'Segoe UI', sans-serif;
-      text-align: center;
+      box-sizing: border-box;
     }
-    .hero, .form-card, .chat-area {
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #74b9ff 0%, #a29bfe 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       padding: 20px;
     }
-    .form-card, .chat-area {
-      max-width: 400px;
-      margin: 30px auto;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    }
-    input, textarea, select, button {
+
+    .container {
       width: 100%;
+      max-width: 400px;
+      position: relative;
+    }
+
+    /* מסך ראשי */
+    .hero {
+      background: linear-gradient(135deg, #00cec9 0%, #74b9ff 100%);
+      border-radius: 24px;
+      padding: 60px 40px;
+      text-align: center;
+      color: white;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 300;
+      margin-bottom: 15px;
+      letter-spacing: -1px;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      margin-bottom: 40px;
+      line-height: 1.5;
+    }
+
+    .hero button {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      padding: 16px 32px;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .hero button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* טפסים */
+    .form-card {
+      background: white;
+      border-radius: 24px;
+      padding: 40px 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .form-card h2 {
+      font-size: 1.8rem;
+      color: #2d3436;
+      margin-bottom: 30px;
+      font-weight: 500;
+    }
+
+    .form-card p {
+      color: #636e72;
+      margin-bottom: 25px;
+      font-size: 1rem;
+    }
+
+    /* שדות קלט */
+    input, textarea, select {
+      width: 100%;
+      padding: 16px 20px;
+      margin: 10px 0;
+      border: 2px solid #e9ecef;
+      border-radius: 16px;
+      font-size: 1rem;
+      background: #f8f9fa;
+      transition: all 0.3s ease;
+      outline: none;
+      text-align: center;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: #74b9ff;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(116, 185, 255, 0.1);
+    }
+
+    /* כפתורים */
+    button {
+      width: 100%;
+      padding: 16px 20px;
       margin: 8px 0;
-      padding: 12px;
-      font-size: 1em;
-      border-radius: 12px;
-      border: 1px solid #ccc;
+      border: none;
+      border-radius: 16px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
-    .chat-message {
-      max-width: 70%;
-      padding: 10px 15px;
-      margin: 10px;
-      border-radius: 18px;
+
+    .primary-btn {
+      background: #74b9ff;
+      color: white;
+    }
+
+    .primary-btn:hover {
+      background: #0984e3;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(116, 185, 255, 0.4);
+    }
+
+    .secondary-btn {
+      background: #e9ecef;
+      color: #2d3436;
+    }
+
+    .secondary-btn:hover {
+      background: #dee2e6;
+      transform: translateY(-1px);
+    }
+
+    .danger-btn {
+      background: #e17055;
+      color: white;
+    }
+
+    .danger-btn:hover {
+      background: #d63031;
+      transform: translateY(-2px);
+    }
+
+    /* אזור צ'אט */
+    .chat-area {
+      background: #f8f9fa;
+      border-radius: 24px;
+      padding: 30px 20px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .chat-header h3 {
+      color: #2d3436;
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+    }
+
+    #timer {
+      background: #ffeaa7;
+      color: #2d3436;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 500;
       display: inline-block;
-      clear: both;
     }
-    .chat-mine {
-      background-color: #d2f8d2;
-      float: left;
-    }
-    .chat-other {
-      background-color: #f0f0f0;
-      float: right;
-    }
+
     #messages {
+      flex: 1;
       max-height: 300px;
       overflow-y: auto;
-      padding: 10px;
-      background: #fff;
-      border-radius: 12px;
-      margin-bottom: 10px;
+      padding: 15px;
+      background: white;
+      border-radius: 16px;
+      margin: 15px 0;
+      border: 1px solid #e9ecef;
     }
-    #timer {
-      font-weight: bold;
-      margin: 10px 0;
-      color: #333;
+
+    #messages::-webkit-scrollbar {
+      width: 4px;
     }
+
+    #messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    #messages::-webkit-scrollbar-thumb {
+      background: #dee2e6;
+      border-radius: 2px;
+    }
+
+    .chat-message {
+      max-width: 80%;
+      padding: 12px 16px;
+      margin: 8px 0;
+      border-radius: 18px;
+      display: block;
+      clear: both;
+      animation: messageSlide 0.3s ease-out;
+      position: relative;
+    }
+
+    @keyframes messageSlide {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .chat-mine {
+      background: #74b9ff;
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
+
+    .chat-other {
+      background: #e9ecef;
+      color: #2d3436;
+      margin-right: auto;
+      border-bottom-left-radius: 4px;
+    }
+
+    .chat-message strong {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .chat-message .time {
+      font-size: 0.75rem;
+      opacity: 0.6;
+      margin-top: 4px;
+    }
+
+    /* כפתורי פעולה בצ'אט */
+    .chat-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .chat-actions button {
+      padding: 12px;
+      font-size: 0.9rem;
+    }
+
+    /* פופאפ QR */
     #qrPopup {
       display: none;
       position: fixed;
@@ -69,60 +299,144 @@
       left: 50%;
       transform: translate(-50%, -50%);
       background: white;
-      padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-      z-index: 999;
+      padding: 40px;
+      border-radius: 24px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      text-align: center;
+      animation: popIn 0.3s ease-out;
     }
-    #qrPopup button {
-      margin-top: 10px;
-      background: #ff5e5e;
-      color: white;
+
+    #qrPopup::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: -1;
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+
+    #qr img {
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+
+    #shareLink {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 12px;
+      margin: 15px 0;
+      word-break: break-all;
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: #636e72;
+      border: 1px solid #dee2e6;
+    }
+
+    /* רספונסיבי */
+    @media (max-width: 480px) {
+      .container {
+        margin: 10px;
+      }
+
+      .hero, .form-card, .chat-area {
+        padding: 30px 20px;
+      }
+
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+    }
+
+    /* אפקטי מעבר */
+    .slide-in {
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 </head>
 <body>
-  <div class="hero">
-    <h1>PopChat</h1>
-    <p>פתח חדר שיחה זמני. שתף ב־QR חופשי.</p>
-    <button onclick="showSetup()">🎈 צור חדר חדש</button>
-  </div>
+  <div class="container">
+    <!-- מסך ראשי -->
+    <div class="hero">
+      <h1>PopChat</h1>
+      <p>פתח חדר שיחה זמני. שתף ב-QR חופשי!</p>
+      <button onclick="showSetup()">🎈 צור חדר חדש</button>
+    </div>
 
-  <div id="setup" class="form-card" style="display:none">
-    <h2>יצירת חדר</h2>
-    <input type="text" id="roomName" placeholder="שם החדר">
-    <input type="text" id="nickname" placeholder="הכינוי שלך">
-    <button onclick="generateNickname()">בחר לי כינוי</button>
-    <select id="roomDuration">
-      <option value="5">5 דקות</option>
-      <option value="10" selected>10 דקות</option>
-      <option value="15">15 דקות</option>
-      <option value="30">30 דקות</option>
-    </select>
-    <button onclick="createRoom()">יאללה בוא נתחיל!</button>
-  </div>
+    <!-- יצירת חדר -->
+    <div id="setup" class="form-card slide-in" style="display:none">
+      <h2>יצירת חדר</h2>
+      <input type="text" id="roomName" placeholder="איך לקרוא לחדר?">
+      <input type="text" id="nickname" placeholder="הכינוי שלך">
+      <button class="secondary-btn" onclick="generateNickname()">בחר לי כינוי</button>
+      <select id="roomDuration">
+        <option value="5">⏰ 5 דקות</option>
+        <option value="10" selected>⏰ 10 דקות</option>
+        <option value="15">⏰ 15 דקות</option>
+        <option value="30">⏰ 30 דקות</option>
+      </select>
+      <button class="primary-btn" onclick="createRoom()">יאללה בוא נתחיל!</button>
+    </div>
 
-  <div id="joinForm" class="form-card" style="display:none">
-    <h2>הצטרפות לחדר</h2>
-    <input type="text" id="joinNickname" placeholder="הכינוי שלך">
-    <button onclick="generateJoinNickname()">בחר לי כינוי</button>
-    <button onclick="joinRoom()">הצטרף לשיחה!</button>
-  </div>
+    <!-- הצטרפות לחדר -->
+    <div id="joinForm" class="form-card slide-in" style="display:none">
+      <h2>הצטרפות לחדר</h2>
+      <p>מישהו הזמין אותך לשיחה! 🎉</p>
+      <input type="text" id="joinNickname" placeholder="הכינוי שלך">
+      <button class="secondary-btn" onclick="generateJoinNickname()">בחר לי כינוי</button>
+      <button class="primary-btn" onclick="joinRoom()">הצטרף לשיחה!</button>
+    </div>
 
-  <div id="chatArea" class="chat-area" style="display:none">
-    <p><strong>חדר:</strong> <span id="roomTitle"></span></p>
-    <p id="timer"></p>
-    <div id="messages"></div>
-    <textarea id="messageInput" placeholder="הקלד הודעה..."></textarea>
-    <button onclick="sendMessage()">שלח</button>
-    <button onclick="deleteChat()">🗑️ מחק שיחה</button>
-    <button onclick="toggleQR(true)">🔗 שתף QR</button>
-    <div id="shareLink"></div>
-  </div>
+    <!-- אזור צ'אט -->
+    <div id="chatArea" class="chat-area slide-in" style="display:none">
+      <div class="chat-header">
+        <h3 id="roomTitle">חדר הצ'אט</h3>
+        <div id="timer">⏰ טוען...</div>
+      </div>
 
-  <div id="qrPopup">
-    <div id="qr"></div>
-    <button onclick="toggleQR(false)">סגור</button>
+      <div id="messages"></div>
+
+      <textarea id="messageInput" placeholder="הקלד הודעה..." rows="2"></textarea>
+      <button class="primary-btn" onclick="sendMessage()">שלח 📤</button>
+
+      <div class="chat-actions">
+        <button class="secondary-btn" onclick="toggleQR(true)">Share QR</button>
+        <button class="danger-btn" onclick="deleteChat()">Delete the bubble</button>
+      </div>
+
+      <div id="shareLink"></div>
+    </div>
+
+    <!-- פופאפ QR -->
+    <div id="qrPopup">
+      <h3>סרוק כדי להצטרף</h3>
+      <div id="qr"></div>
+      <button class="danger-btn" onclick="toggleQR(false)">סגור</button>
+    </div>
   </div>
 
   <script>
@@ -155,12 +469,10 @@
 
       if (joinId) {
         console.log('Found join code, showing join form');
-        // אם יש קוד הצטרפות, הסתר את הדף הראשי והראה את טופס ההצטרפות
         document.querySelector('.hero').style.display = 'none';
         document.getElementById('joinForm').style.display = 'block';
         joinRoomId = joinId;
 
-        // עדכון כותרת הדף עם שם החדר
         db.ref('rooms/' + joinId).once('value').then(snap => {
           const room = snap.val();
           console.log('Room data:', room);
@@ -177,7 +489,6 @@
       }
     }
 
-    // הפעלת הבדיקה כשהעמוד נטען
     window.addEventListener('DOMContentLoaded', checkForJoinCode);
     window.addEventListener('load', checkForJoinCode);
 
@@ -187,13 +498,23 @@
     }
 
     function generateNickname() {
-      const names = ["בלון77", "עין-הסערה", "פינגווין_חשאי", "ריי-צ׳אט", "שקט_פתאומי"];
+      const names = [
+        "🦄 חד-קרן-ורוד", "🚀 קפטן-גלקסיה", "🎭 נינג׳ה-צבעוני",
+        "⚡ ברק-כחול", "🌟 כוכב-לכת", "🎪 ליצן-קוסמי",
+        "🎨 אמן-פיקסלים", "🎵 מלחין-דיגיטל", "🎯 צלף-מילים",
+        "🎲 קוביה-מעופפת", "🎈 בלון-קסום", "🎊 זיקוק-צבעוני"
+      ];
       const rand = names[Math.floor(Math.random() * names.length)];
       document.getElementById('nickname').value = rand;
     }
 
     function generateJoinNickname() {
-      const names = ["בלון77", "עין-הסערה", "פינגווין_חשאי", "ריי-צ׳אט", "שקט_פתאומי"];
+      const names = [
+        "🦄 חד-קרן-ורוד", "🚀 קפטן-גלקסיה", "🎭 נינג׳ה-צבעוני",
+        "⚡ ברק-כחול", "🌟 כוכב-לכת", "🎪 ליצן-קוסמי",
+        "🎨 אמן-פיקסלים", "🎵 מלחין-דיגיטל", "🎯 צלף-מילים",
+        "🎲 קוביה-מעופפת", "🎈 בלון-קסום", "🎊 זיקוק-צבעוני"
+      ];
       const rand = names[Math.floor(Math.random() * names.length)];
       document.getElementById('joinNickname').value = rand;
     }
@@ -205,11 +526,9 @@
       currentRoomId = joinRoomId;
       currentNickname = nickname;
 
-      // בדיקה שהחדר עדיין קיים
       db.ref('rooms/' + joinRoomId).once('value').then(snap => {
         const room = snap.val();
         if (room) {
-          // בדיקה שהחדר לא פג תוקף
           if (Date.now() > room.expiresAt) {
             alert("החדר פג תוקף");
             return;
@@ -276,14 +595,14 @@
         const div = document.createElement('div');
         const time = new Date(msg.timestamp).toLocaleTimeString('he-IL', {hour: '2-digit', minute: '2-digit'});
         div.className = 'chat-message ' + (msg.sender === currentNickname ? 'chat-mine' : 'chat-other');
-        div.innerHTML = `<strong>${msg.sender}</strong> • ${time}<br>${msg.text}`;
+        div.innerHTML = `<strong>${msg.sender}</strong><div>${msg.text}</div><div class="time">${time}</div>`;
         container.appendChild(div);
         container.scrollTop = container.scrollHeight;
       });
     }
 
     function deleteChat() {
-      if (confirm("למחוק את כל ההודעות בחדר?")) {
+      if (confirm("Delete the bubble?")) {
         db.ref('messages/' + currentRoomId).remove();
         document.getElementById('messages').innerHTML = '';
       }
@@ -295,7 +614,7 @@
         const diff = Math.max(0, expiresAt - now);
         const min = Math.floor(diff / 60000);
         const sec = Math.floor((diff % 60000) / 1000);
-        document.getElementById('timer').innerText = `זמן נותר: ${min}:${sec.toString().padStart(2, '0')}`;
+        document.getElementById('timer').innerText = `⏰ ${min}:${sec.toString().padStart(2, '0')}`;
         if (diff <= 0) {
           clearInterval(timerInterval);
           alert("הזמן לשיחה נגמר.");
@@ -305,6 +624,19 @@
       update();
       timerInterval = setInterval(update, 1000);
     }
+
+    // Enter key to send message
+    document.addEventListener('DOMContentLoaded', function() {
+      const messageInput = document.getElementById('messageInput');
+      if (messageInput) {
+        messageInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+          }
+        });
+      }
+    });
   </script>
 </body>
 </html>
