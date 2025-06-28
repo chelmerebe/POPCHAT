@@ -4,7 +4,44 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PopChat - צ'אט זמני</title>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">window.onload = function () {
+  const params = new URLSearchParams(window.location.search);
+  const joinId = params.get('join');
+  if (joinId) {
+    document.querySelector('.hero').style.display = 'none';
+    const joinForm = document.createElement('div');
+    joinForm.className = 'form-card';
+    joinForm.innerHTML = `
+      <h2>הצטרפות לחדר</h2>
+      <input type="text" id="nickname" placeholder="הכינוי שלך">
+      <button onclick="generateNickname()">בחר לי כינוי</button>
+      <button onclick="joinRoom('${joinId}')">הצטרף לשיחה!</button>
+    `;
+    document.body.appendChild(joinForm);
+    db.ref('rooms/' + joinId).once('value').then(snap => {
+      const room = snap.val();
+      if (room) document.title = 'PopChat - ' + room.name;
+    });
+  }
+}
+
+function joinRoom(roomId) {
+  const nickname = document.getElementById('nickname').value.trim();
+  if (!nickname) return alert("נא להזין כינוי");
+  currentRoomId = roomId;
+  currentNickname = nickname;
+  document.querySelector('.form-card').style.display = 'none';
+  document.getElementById('chatArea').style.display = 'block';
+  db.ref('rooms/' + roomId).once('value').then(snap => {
+    const room = snap.val();
+    if (room) {
+      document.getElementById('roomTitle').innerText = room.name;
+      listenForMessages();
+      startTimer(room.expiresAt);
+    }
+  });
+}
+</script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
   <style>
@@ -162,7 +199,7 @@
       document.getElementById('setup').style.display = 'none';
       document.getElementById('chatArea').style.display = 'block';
 
-      const shareUrl = window.location.origin + window.location.pathname + '?room_id=' + roomId;
+      const shareUrl = window.location.origin + window.location.pathname + '?join=' + roomId;
       const qr = qrcode(0, 'M');
       qr.addData(shareUrl);
       qr.make();
