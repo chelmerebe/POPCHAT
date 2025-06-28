@@ -4,80 +4,155 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PopChat - צ'אט זמני</title>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">window.onload = function () {
+  const params = new URLSearchParams(window.location.search);
+  const joinId = params.get('join');
+  if (joinId) {
+    document.querySelector('.hero').style.display = 'none';
+    const joinForm = document.createElement('div');
+    joinForm.className = 'form-card';
+    joinForm.innerHTML = `
+      <h2>הצטרפות לחדר</h2>
+      <input type="text" id="nickname" placeholder="הכינוי שלך">
+      <button onclick="generateNickname()">בחר לי כינוי</button>
+      <button onclick="joinRoom('${joinId}')">הצטרף לשיחה!</button>
+    `;
+    document.body.appendChild(joinForm);
+    db.ref('rooms/' + joinId).once('value').then(snap => {
+      const room = snap.val();
+      if (room) document.title = 'PopChat - ' + room.name;
+    });
+  }
+}
+
+function joinRoom(roomId) {
+  const nickname = document.getElementById('nickname').value.trim();
+  if (!nickname) return alert("נא להזין כינוי");
+  currentRoomId = roomId;
+  currentNickname = nickname;
+  document.querySelector('.form-card').style.display = 'none';
+  document.getElementById('chatArea').style.display = 'block';
+  db.ref('rooms/' + roomId).once('value').then(snap => {
+    const room = snap.val();
+    if (room) {
+      document.getElementById('roomTitle').innerText = room.name;
+      listenForMessages();
+      startTimer(room.expiresAt);
+    }
+  });
+}
+</script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
   <style>
     body {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      font-family: sans-serif;
-      color: white;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #c2e9fb 0%, #f9f9f9 100%);
+      font-family: 'Segoe UI', sans-serif;
       text-align: center;
-      padding: 40px;
     }
-    .container {
+    .hero, .form-card, .chat-area {
+      padding: 20px;
+    }
+    .form-card, .chat-area {
+      max-width: 400px;
+      margin: 30px auto;
       background: white;
-      color: black;
-      padding: 40px;
-      border-radius: 20px;
-      max-width: 600px;
-      margin: auto;
-      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
-    .chat {
-      margin-top: 20px;
-      text-align: right;
-    }
-    .chat input, .chat textarea {
+    input, textarea, select, button {
       width: 100%;
-      margin-bottom: 10px;
-      padding: 10px;
-      border-radius: 10px;
+      margin: 8px 0;
+      padding: 12px;
+      font-size: 1em;
+      border-radius: 12px;
       border: 1px solid #ccc;
     }
-    .chat button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 20px;
-      background: #667eea;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
+    .chat-message {
+      max-width: 70%;
+      padding: 10px 15px;
+      margin: 10px;
+      border-radius: 18px;
+      display: inline-block;
+      clear: both;
     }
-    .messages {
-      margin-top: 20px;
-      background: #f8f9fa;
-      border-radius: 10px;
-      padding: 15px;
-      text-align: right;
-      height: 200px;
+    .chat-mine {
+      background-color: #d2f8d2;
+      float: left;
+    }
+    .chat-other {
+      background-color: #f0f0f0;
+      float: right;
+    }
+    #messages {
+      max-height: 300px;
       overflow-y: auto;
+      padding: 10px;
+      background: #fff;
+      border-radius: 12px;
+      margin-bottom: 10px;
+    }
+    #timer {
+      font-weight: bold;
+      margin: 10px 0;
       color: #333;
     }
-    .message {
-      margin-bottom: 10px;
+    #qrPopup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      z-index: 999;
+    }
+    #qrPopup button {
+      margin-top: 10px;
+      background: #ff5e5e;
+      color: white;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🎈 PopChat</h1>
-    <p>צ'אט זמני עם קישור ו-QR קוד</p>
+  <div class="hero">
+    <h1>PopChat</h1>
+    <p>פתח חדר שיחה זמני. שתף ב־QR חופשי.</p>
+    <button onclick="showSetup()">🎈 צור חדר חדש</button>
+  </div>
 
-    <div id="setup">
-      <input type="text" id="roomName" placeholder="שם החדר">
-      <input type="text" id="nickname" placeholder="הכינוי שלך">
-      <button onclick="createRoom()">צור חדר</button>
-    </div>
+  <div id="setup" class="form-card" style="display:none">
+    <h2>יצירת חדר</h2>
+    <input type="text" id="roomName" placeholder="שם החדר">
+    <input type="text" id="nickname" placeholder="הכינוי שלך">
+    <button onclick="generateNickname()">בחר לי כינוי</button>
+    <select id="roomDuration">
+      <option value="5">5 דקות</option>
+      <option value="10" selected>10 דקות</option>
+      <option value="15">15 דקות</option>
+      <option value="30">30 דקות</option>
+    </select>
+    <button onclick="createRoom()">יאללה בוא נתחיל!</button>
+  </div>
 
-    <div id="chatArea" class="chat" style="display:none">
-      <p><strong>חדר:</strong> <span id="roomTitle"></span></p>
-      <div class="messages" id="messages"></div>
-      <textarea id="messageInput" rows="2" placeholder="הקלד הודעה..."></textarea>
-      <button onclick="sendMessage()">שלח</button>
-      <div id="qr" style="margin-top:20px;"></div>
-      <div id="shareLink" style="word-break:break-all; margin-top:10px;"></div>
-    </div>
+  <div id="chatArea" class="chat-area" style="display:none">
+    <p><strong>חדר:</strong> <span id="roomTitle"></span></p>
+    <p id="timer"></p>
+    <div id="messages"></div>
+    <textarea id="messageInput" placeholder="הקלד הודעה..."></textarea>
+    <button onclick="sendMessage()">שלח</button>
+    <button onclick="deleteChat()">🗑️ מחק שיחה</button>
+    <button onclick="toggleQR(true)">🔗 שתף QR</button>
+    <div id="shareLink"></div>
+  </div>
+
+  <div id="qrPopup">
+    <div id="qr"></div>
+    <button onclick="toggleQR(false)">סגור</button>
   </div>
 
   <script>
@@ -90,45 +165,58 @@
       messagingSenderId: "544946809123",
       appId: "1:544946809123:web:1d52efbff657fa118c4496"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     let currentRoomId = null;
     let currentNickname = null;
+    let timerInterval;
+
+    function showSetup() {
+      document.querySelector('.hero').style.display = 'none';
+      document.getElementById('setup').style.display = 'block';
+    }
+
+    function generateNickname() {
+      const names = ["בלון77", "עין-הסערה", "פינגווין_חשאי", "ריי-צ׳אט", "שקט_פתאומי"];
+      const rand = names[Math.floor(Math.random() * names.length)];
+      document.getElementById('nickname').value = rand;
+    }
 
     function createRoom() {
       const roomName = document.getElementById('roomName').value.trim();
       const nickname = document.getElementById('nickname').value.trim();
-      if (!roomName || !nickname) return alert('יש למלא את כל השדות');
+      const duration = parseInt(document.getElementById('roomDuration').value);
+      if (!roomName || !nickname) return alert("יש למלא את כל השדות");
 
       const roomId = Math.random().toString(36).substring(2, 10);
-      const expiresAt = Date.now() + 10 * 60 * 1000;
-
+      const expiresAt = Date.now() + duration * 60 * 1000;
       db.ref('rooms/' + roomId).set({ name: roomName, createdBy: nickname, createdAt: Date.now(), expiresAt });
 
       currentRoomId = roomId;
       currentNickname = nickname;
-
       document.getElementById('roomTitle').innerText = roomName;
       document.getElementById('setup').style.display = 'none';
       document.getElementById('chatArea').style.display = 'block';
 
-      const shareUrl = window.location.origin + window.location.pathname + '?room_id=' + roomId;
-      document.getElementById('shareLink').innerText = shareUrl;
-
+      const shareUrl = window.location.origin + window.location.pathname + '?join=' + roomId;
       const qr = qrcode(0, 'M');
       qr.addData(shareUrl);
       qr.make();
       document.getElementById('qr').innerHTML = qr.createImgTag(4);
+      document.getElementById('shareLink').innerText = shareUrl;
 
       listenForMessages();
+      startTimer(expiresAt);
+    }
+
+    function toggleQR(show) {
+      document.getElementById('qrPopup').style.display = show ? 'block' : 'none';
     }
 
     function sendMessage() {
       const text = document.getElementById('messageInput').value.trim();
       if (!text) return;
-
       db.ref('messages/' + currentRoomId).push({
         text,
         sender: currentNickname,
@@ -139,45 +227,40 @@
 
     function listenForMessages() {
       const container = document.getElementById('messages');
-      db.ref('messages/' + currentRoomId).on('child_added', (snap) => {
+      db.ref('messages/' + currentRoomId).on('child_added', snap => {
         const msg = snap.val();
         const div = document.createElement('div');
-        div.className = 'message';
-        const time = new Date(msg.timestamp).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-        div.innerText = `${msg.sender} • ${time}
-${msg.text}`;
+        const time = new Date(msg.timestamp).toLocaleTimeString('he-IL', {hour: '2-digit', minute: '2-digit'});
+        div.className = 'chat-message ' + (msg.sender === currentNickname ? 'chat-mine' : 'chat-other');
+        div.innerHTML = `<strong>${msg.sender}</strong> • ${time}<br>${msg.text}`;
         container.appendChild(div);
         container.scrollTop = container.scrollHeight;
       });
     }
 
-    window.addEventListener('load', () => {
-      const params = new URLSearchParams(window.location.search);
-      const roomId = params.get('room_id');
-      if (roomId) {
-        db.ref('rooms/' + roomId).once('value').then(snap => {
-          const room = snap.val();
-          if (!room || Date.now() > room.expiresAt) {
-            alert('החדר לא קיים או פג תוקפו');
-            return;
-          }
-          currentRoomId = roomId;
-          currentNickname = 'אורח';
-          document.getElementById('roomTitle').innerText = room.name;
-          document.getElementById('setup').style.display = 'none';
-          document.getElementById('chatArea').style.display = 'block';
-
-          const shareUrl = window.location.href;
-          document.getElementById('shareLink').innerText = shareUrl;
-          const qr = qrcode(0, 'M');
-          qr.addData(shareUrl);
-          qr.make();
-          document.getElementById('qr').innerHTML = qr.createImgTag(4);
-
-          listenForMessages();
-        });
+    function deleteChat() {
+      if (confirm("למחוק את כל ההודעות בחדר?")) {
+        db.ref('messages/' + currentRoomId).remove();
+        document.getElementById('messages').innerHTML = '';
       }
-    });
+    }
+
+    function startTimer(expiresAt) {
+      function update() {
+        const now = Date.now();
+        const diff = Math.max(0, expiresAt - now);
+        const min = Math.floor(diff / 60000);
+        const sec = Math.floor((diff % 60000) / 1000);
+        document.getElementById('timer').innerText = `זמן נותר: ${min}:${sec.toString().padStart(2, '0')}`;
+        if (diff <= 0) {
+          clearInterval(timerInterval);
+          alert("הזמן לשיחה נגמר.");
+          document.getElementById('messageInput').disabled = true;
+        }
+      }
+      update();
+      timerInterval = setInterval(update, 1000);
+    }
   </script>
 </body>
 </html>
