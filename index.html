@@ -42,17 +42,6 @@
       overflow: hidden;
     }
 
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      width: 60px;
-      height: 60px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-    }
-
     .hero h1 {
       font-size: 3rem;
       font-weight: 300;
@@ -107,72 +96,21 @@
       font-size: 1rem;
     }
 
-    /* שדה הודעה עם כפתור שליחה */
-    .message-input-container {
-      position: relative;
-      margin: 8px 0;
-    }
-
-    .message-input-container textarea {
+    /* שדות קלט */
+    input, textarea, select {
       width: 100%;
-      padding: 12px 50px 12px 16px;
-      margin: 0;
-      border: 2px solid #e9ecef;
-      border-radius: 12px;
-      font-size: 0.9rem;
-      background: #f8f9fa;
-      transition: all 0.3s ease;
-      outline: none;
-      text-align: right;
-      resize: none;
-    }
-
-    .message-input-container textarea:focus {
-      border-color: #74b9ff;
-      background: white;
-      box-shadow: 0 0 0 4px rgba(116, 185, 255, 0.1);
-    }
-
-    .send-btn {
-      position: absolute;
-      left: 8px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 36px;
-      height: 36px;
-      border: none;
-      border-radius: 50%;
-      background: #74b9ff;
-      color: white;
+      padding: 16px 20px;
+      margin: 12px 0;
+      border: 2px solid #e1e8f0;
+      border-radius: 16px;
       font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .send-btn:hover {
-      background: #0984e3;
-      transform: translateY(-50%) scale(1.1);
-    }
-
-    /* שדות קלט רגילים */
-    input, select {
-      width: 100%;
-      padding: 12px 16px;
-      margin: 6px 0;
-      border: 2px solid #e9ecef;
-      border-radius: 12px;
-      font-size: 0.9rem;
-      background: #f8f9fa;
+      background: rgba(255, 255, 255, 0.8);
       transition: all 0.3s ease;
       outline: none;
       text-align: center;
     }
 
-    input:focus, select:focus {
+    input:focus, textarea:focus, select:focus {
       border-color: #74b9ff;
       background: white;
       box-shadow: 0 0 0 4px rgba(116, 185, 255, 0.1);
@@ -181,16 +119,25 @@
     /* כפתורים */
     button {
       width: 100%;
-      padding: 12px 16px;
-      margin: 6px 0;
+      padding: 16px 20px;
+      margin: 8px 0;
       border: none;
-      border-radius: 12px;
-      font-size: 0.9rem;
-      font-weight: 500;
+      border-radius: 16px;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    button:active {
+      transform: translateY(0);
     }
 
     .primary-btn {
@@ -200,8 +147,6 @@
 
     .primary-btn:hover {
       background: #0984e3;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(116, 185, 255, 0.4);
     }
 
     .secondary-btn {
@@ -211,7 +156,6 @@
 
     .secondary-btn:hover {
       background: #dee2e6;
-      transform: translateY(-1px);
     }
 
     .danger-btn {
@@ -221,7 +165,6 @@
 
     .danger-btn:hover {
       background: #d63031;
-      transform: translateY(-2px);
     }
 
     /* אזור צ'אט */
@@ -334,6 +277,56 @@
       margin-top: 4px;
     }
 
+    /* שדה הודעה עם כפתור שליחה */
+    .message-input-container {
+      position: relative;
+      margin: 8px 0;
+    }
+
+    .message-input-container textarea {
+      width: 100%;
+      padding: 12px 50px 12px 16px;
+      margin: 0;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      background: white;
+      transition: all 0.3s ease;
+      outline: none;
+      text-align: right;
+      resize: none;
+    }
+
+    .message-input-container textarea:focus {
+      border-color: #74b9ff;
+      box-shadow: 0 0 0 4px rgba(116, 185, 255, 0.1);
+    }
+
+    .send-btn {
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      background: #74b9ff;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .send-btn:hover {
+      background: #0984e3;
+      transform: translateY(-50%) scale(1.1);
+    }
+
     /* כפתורי פעולה בצ'אט */
     .chat-actions {
       display: grid;
@@ -391,18 +384,6 @@
       margin: 20px 0;
     }
 
-    #shareLink {
-      background: #f8f9fa;
-      padding: 15px;
-      border-radius: 12px;
-      margin: 15px 0;
-      word-break: break-all;
-      font-family: monospace;
-      font-size: 0.9rem;
-      color: #636e72;
-      border: 1px solid #dee2e6;
-    }
-
     /* רספונסיבי */
     @media (max-width: 480px) {
       .container {
@@ -417,22 +398,6 @@
         font-size: 2.5rem;
       }
     }
-
-    /* אפקטי מעבר */
-    .slide-in {
-      animation: slideIn 0.5s ease-out;
-    }
-
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
   </style>
 </head>
 <body>
@@ -445,7 +410,7 @@
     </div>
 
     <!-- יצירת חדר -->
-    <div id="setup" class="form-card slide-in" style="display:none">
+    <div id="setup" class="form-card" style="display:none">
       <h2>יצירת חדר</h2>
       <input type="text" id="roomName" placeholder="איך לקרוא לחדר?">
       <input type="text" id="nickname" placeholder="הכינוי שלך">
@@ -460,7 +425,7 @@
     </div>
 
     <!-- הצטרפות לחדר -->
-    <div id="joinForm" class="form-card slide-in" style="display:none">
+    <div id="joinForm" class="form-card" style="display:none">
       <h2>הצטרפות לחדר</h2>
       <p>מישהו הזמין אותך לשיחה! 🎉</p>
       <input type="text" id="joinNickname" placeholder="הכינוי שלך">
@@ -469,7 +434,7 @@
     </div>
 
     <!-- אזור צ'אט -->
-    <div id="chatArea" class="chat-area slide-in" style="display:none">
+    <div id="chatArea" class="chat-area" style="display:none">
       <div class="chat-header">
         <h3 id="roomTitle">חדר הצ'אט</h3>
         <div id="timer">⏰ טוען...</div>
@@ -516,38 +481,24 @@
 
     // בדיקת URL parameters כשהעמוד נטען
     function checkForJoinCode() {
-      console.log('Checking for join code...');
-      console.log('Current URL:', window.location.href);
-
       const params = new URLSearchParams(window.location.search);
       const joinId = params.get('join');
 
-      console.log('Join ID found:', joinId);
-
       if (joinId) {
-        console.log('Found join code, showing join form');
         document.querySelector('.hero').style.display = 'none';
         document.getElementById('joinForm').style.display = 'block';
         joinRoomId = joinId;
 
         db.ref('rooms/' + joinId).once('value').then(snap => {
           const room = snap.val();
-          console.log('Room data:', room);
           if (room) {
             document.title = 'PopChat - ' + room.name;
-          } else {
-            alert('החדר לא נמצא או פג תוקף');
           }
-        }).catch(error => {
-          console.error('Error fetching room:', error);
         });
-      } else {
-        console.log('No join code found, showing main page');
       }
     }
 
     window.addEventListener('DOMContentLoaded', checkForJoinCode);
-    window.addEventListener('load', checkForJoinCode);
 
     function showSetup() {
       document.querySelector('.hero').style.display = 'none';
@@ -624,7 +575,6 @@
       qr.addData(shareUrl);
       qr.make();
       document.getElementById('qr').innerHTML = qr.createImgTag(4);
-      document.getElementById('shareLink').innerText = shareUrl;
 
       listenForMessages();
       startTimer(expiresAt);
@@ -683,15 +633,10 @@
     }
 
     // Enter key to send message
-    document.addEventListener('DOMContentLoaded', function() {
-      const messageInput = document.getElementById('messageInput');
-      if (messageInput) {
-        messageInput.addEventListener('keypress', function(e) {
-          if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-          }
-        });
+    document.addEventListener('keypress', function(e) {
+      if (e.target.id === 'messageInput' && e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
       }
     });
   </script>
