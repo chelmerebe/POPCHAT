@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PopChat - צ'אט זמני</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: sans-serif;
+      color: white;
+      text-align: center;
+      padding: 40px;
+    }
+    .container {
+      background: white;
+      color: black;
+      padding: 40px;
+      border-radius: 20px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    .chat {
+      margin-top: 20px;
+      text-align: right;
+    }
+    .chat input, .chat textarea {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
+    .chat button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 20px;
+      background: #667eea;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .messages {
+      margin-top: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 15px;
+      text-align: right;
+      height: 200px;
+      overflow-y: auto;
+      color: #333;
+    }
+    .message {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎈 PopChat</h1>
+    <p>צ'אט זמני עם קישור ו-QR קוד</p>
+
+    <div id="setup">
+      <input type="text" id="roomName" placeholder="שם החדר">
+      <input type="text" id="nickname" placeholder="הכינוי שלך">
+      <button onclick="createRoom()">צור חדר</button>
+    </div>
+
+    <div id="chatArea" class="chat" style="display:none">
+      <p><strong>חדר:</strong> <span id="roomTitle"></span></p>
+      <div class="messages" id="messages"></div>
+      <textarea id="messageInput" rows="2" placeholder="הקלד הודעה..."></textarea>
+      <button onclick="sendMessage()">שלח</button>
+      <div id="qr" style="margin-top:20px;"></div>
+      <div id="shareLink" style="word-break:break-all; margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAUzDzgIeggPyz7MlgMj_4cgNDbGiCfaKo",
+      authDomain: "popchat-b2dd4.firebaseapp.com",
+      databaseURL: "https://popchat-b2dd4-default-rtdb.firebaseio.com/",
+      projectId: "popchat-b2dd4",
+      storageBucket: "popchat-b2dd4.appspot.com",
+      messagingSenderId: "544946809123",
+      appId: "1:544946809123:web:1d52efbff657fa118c4496"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let currentRoomId = null;
+    let currentNickname = null;
+
+    function createRoom() {
+      const roomName = document.getElementById('roomName').value.trim();
+      const nickname = document.getElementById('nickname').value.trim();
+      if (!roomName || !nickname) return alert('יש למלא את כל השדות');
+
+      const roomId = Math.random().toString(36).substring(2, 10);
+      const expiresAt = Date.now() + 10 * 60 * 1000;
+
+      db.ref('rooms/' + roomId).set({ name: roomName, createdBy: nickname, createdAt: Date.now(), expiresAt });
+
+      currentRoomId = roomId;
+      currentNickname = nickname;
+
+      document.getElementById('roomTitle').innerText = roomName;
+      document.getElementById('setup').style.display = 'none';
+      document.getElementById('chatArea').style.display = 'block';
+
+      const shareUrl = window.location.origin + window.location.pathname + '?room_id=' + roomId;
+      document.getElementById('shareLink').innerText = shareUrl;
+
+      const qr = qrcode(0, 'M');
+      qr.addData(shareUrl);
+      qr.make();
+      document.getElementById('qr').innerHTML = qr.createImgTag(4);
+
+      listenForMessages();
+    }
+
+    function sendMessage() {
+      const text = document.getElementById('messageInput').value.trim();
+      if (!text) return;
+
+      db.ref('messages/' + currentRoomId).push({
+        text,
+        sender: currentNickname,
+        timestamp: Date.now()
+      });
+      document.getElementById('messageInput').value = '';
+    }
+
+    function listenForMessages() {
+      const container = document.getElementById('messages');
+      db.ref('messages/' + currentRoomId).on('child_added', (snap) => {
+        const msg = snap.val();
+        const div = document.createElement('div');
+        div.className = 'message';
+        const time = new Date(msg.timestamp).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+        div.innerText = `${msg.sender} • ${time}
+${msg.text}`;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+      });
+    }
+
+    window.addEventListener('load', () => {
+      const params = new URLSearchParams(window.location.search);
+      const roomId = params.get('room_id');
+      if (roomId) {
+        db.ref('rooms/' + roomId).once('value').then(snap => {
+          const room = snap.val();
+          if (!room || Date.now() > room.expiresAt) {
+            alert('החדר לא קיים או פג תוקפו');
+            return;
+          }
+          currentRoomId = roomId;
+          currentNickname = 'אורח';
+          document.getElementById('roomTitle').innerText = room.name;
+          document.getElementById('setup').style.display = 'none';
+          document.getElementById('chatArea').style.display = 'block';
+
+          const shareUrl = window.location.href;
+          document.getElementById('shareLink').innerText = shareUrl;
+          const qr = qrcode(0, 'M');
+          qr.addData(shareUrl);
+          qr.make();
+          document.getElementById('qr').innerHTML = qr.createImgTag(4);
+
+          listenForMessages();
+        });
+      }
+    });
+  </script>
+</body>
+</html>
