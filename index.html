@@ -545,7 +545,7 @@
           document.getElementById('chatArea').style.display = 'block';
 
           // יצירת QR קוד גם למצטרף
-          const shareUrl = window.location.origin + window.location.pathname + '?join=' + joinRoomId;
+          const shareUrl = window.location.origin + window.location.pathname + '?join=' + currentRoomId;
           const qr = qrcode(0, 'M');
           qr.addData(shareUrl);
           qr.make();
