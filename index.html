@@ -544,6 +544,13 @@
           document.getElementById('joinForm').style.display = 'none';
           document.getElementById('chatArea').style.display = 'block';
 
+          // יצירת QR קוד גם למצטרף
+          const shareUrl = window.location.origin + window.location.pathname + '?join=' + joinRoomId;
+          const qr = qrcode(0, 'M');
+          qr.addData(shareUrl);
+          qr.make();
+          document.getElementById('qr').innerHTML = qr.createImgTag(4);
+
           listenForMessages();
           startTimer(room.expiresAt);
         } else {
